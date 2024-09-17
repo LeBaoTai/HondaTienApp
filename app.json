@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "HondaTien",
-    "slug": "HondaTien",
+    "name": "Honda Tien",
+    "slug": "Honda Tien",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/engineering.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/hdTienSplash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -16,7 +16,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/engineering.png",
         "backgroundColor": "#ffffff"
       }
     },

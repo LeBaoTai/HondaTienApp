@@ -4,4 +4,5 @@ type RootStackParamList = {
   CategoryScreen: undefined;
   ProductScreen: any;
 	AboutScreen: undefined;
+  InvoiceScreen: undefined;
 };

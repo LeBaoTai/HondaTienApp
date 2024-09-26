@@ -204,6 +204,41 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  // ALL PRODUCT SESSIONS 
+  // Function to fetch all products from all categories
+  const getAllProducts = async () => {
+    try {
+      setLoading(true);
+      const categoriesCollection = collection(db, 'categories'); // Collection for categories
+      const categoriesSnapshot = await getDocs(categoriesCollection); // Get all categories
+      let allProducts = []; // Array to hold all products
+
+      // Loop through each category
+      for (const categoryDoc of categoriesSnapshot.docs) {
+        const categoryId = categoryDoc.id; // Get category ID
+        const productsCollection = collection(db, `categories/${categoryId}/products`); // Reference to the products collection of this category
+        const productsSnapshot = await getDocs(productsCollection); // Get products in this category
+
+        // Add each product to the allProducts array
+        const productsList = productsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        allProducts = [...allProducts, ...productsList]; // Merge current category products with allProducts
+      }
+      setAllProducts(allProducts);
+    } catch (error) {
+      console.error("Error fetching products: ", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getAllProducts();
+  }, []);
+
   return (
     <AppContext.Provider
       value={{
@@ -229,6 +264,7 @@ export const AppProvider = ({ children }) => {
 
         ////// PRODUCT SESSION
 
+        allProducts,
         fetchProducts,
 
         //update product

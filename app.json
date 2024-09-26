@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Honda Tien",
-    "slug": "Honda Tien",
+    "slug": "honda-tien",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/engineering.png",
@@ -18,10 +18,16 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/engineering.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.lebaotai0711.hondatien"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "2fbb28cf-3929-4a0b-9542-bc9b0008aa2b"
+      }
     }
   }
 }

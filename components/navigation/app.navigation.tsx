@@ -8,6 +8,7 @@ import CategoryScreen from "../review/category";
 import HomeScreen from "../review/home";
 import ProductScreen from "../review/product";
 import AppHeader from "./app.header";
+import InvoiceScreen from '../review/invoice';
 
 const HomeLayout = () => {
   const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -43,9 +44,20 @@ const HomeLayout = () => {
           },
         }}
       />
+
+      <Stack.Screen
+        name='InvoiceScreen'
+        component={InvoiceScreen}
+        options={{
+          title: "Hoá đơn",
+          headerTitleStyle: {
+            fontFamily: LOBSTER_REGULAR,
+          },
+        }}
+      />
     </Stack.Navigator>
-  )
-}
+  );
+};
 
 const AppNavigation = () => {
   const Drawer = createDrawerNavigator<RootStackParamList>();
@@ -77,7 +89,7 @@ const AppNavigation = () => {
         component={AboutScreen}
       />
     </Drawer.Navigator>
-  )
-}
+  );
+};
 
 export default AppNavigation;

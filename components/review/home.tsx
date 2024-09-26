@@ -19,7 +19,7 @@ const HomeScreen = () => {
 			</Pressable>
 
 			<Pressable
-				onPress={() => alert('Hoá đơn')}
+				onPress={() => navigation.navigate('InvoiceScreen')}
 			>
 				<View style={styles.blockItem}>
 					<Text style={globalFont.titleFont}>

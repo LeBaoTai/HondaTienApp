@@ -2,18 +2,22 @@
 import { useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { globalFont } from "../../../../utils/const";
-import { useAppContext } from "../../../../AppContext";
+import { useAppContext } from "../../../../app-context/app.context";
 
-const UpdateProduct = (props: any) => {
+interface IUpdateProduct {
+  reload: () => Promise<void>;
+}
+
+const UpdateProductModal = (props: IUpdateProduct) => {
   const { isUpdateProductModalVisible, toggleUpdateProductModal, productToEdit, updateProduct } = useAppContext();
   const [newName, setNewName] = useState(productToEdit ? productToEdit.name : '');
   const [newPrice, setNewPrice] = useState(productToEdit ? productToEdit.price : '');
 
-  const handleUpdateProduct = () => {
+  const handleUpdateProduct = async () => {
     if (productToEdit) {
-      updateProduct(productToEdit.parrentId, productToEdit.id, newName.trim(), newPrice);
+      await updateProduct(productToEdit.parrentId, productToEdit.id, newName.trim(), newPrice);
       toggleUpdateProductModal(null);
-      props.reload();
+      await props.reload();
     }
   };
 
@@ -88,7 +92,7 @@ const UpdateProduct = (props: any) => {
   );
 };
 
-export default UpdateProduct;
+export default UpdateProductModal;
 
 const styles = StyleSheet.create({
   container: {

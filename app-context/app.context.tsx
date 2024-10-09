@@ -1,12 +1,11 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { db, app, collection, addDoc, doc, updateDoc, deleteDoc, getDocs, where, query } from './firebase/config';
+import { db, app, collection, addDoc, doc, updateDoc, deleteDoc, getDocs, where, query, getDoc } from '../firebase/config';
 
 // Create context
 const AppContext = createContext(undefined);
 
 // Create a provider component
 export const AppProvider = ({ children }) => {
-  const [categories, setCategories] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [isNewCategoryModalVisible, setNewCategoryModalVisible] = useState(false);
   const [isChangeNameModalVisible, setChangeNameModalVisible] = useState(false);
@@ -19,22 +18,26 @@ export const AppProvider = ({ children }) => {
   const [isUpdateProductModalVisible, setUpdateProductModalVisible] = useState(false);
 
   // LOADING 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  // INVOICE SESSION
+  const [isNewInvoiceModalVisible, setNewInvoiceModalVisible] = useState(false);
+  const [isUpdateInvoiceModalVisible, setUpdateInvoiceModalVisible] = useState(false);
+  const [invoiceToEdit, setInvoiceToEdit] = useState([]);
+
+
+  // ADD PRODUCT TO INVOICE
+  const [isAddProductToInvoiceModalVisible, setAddProductToInvoiceVisible] = useState(false);
 
   const fetchCategories = async () => {
     try {
-      // start loading
       setLoading(true);
-
       const querySnapshot = await getDocs(collection(db, 'categories'));
-
       const categoriesList = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
-
-      // Set the fetched categories in the local state
-      setCategories(categoriesList);
+      return categoriesList;
     } catch (e) {
       console.error('Error fetching categories: ', e);
     } finally {
@@ -44,73 +47,36 @@ export const AppProvider = ({ children }) => {
 
   const addCategory = async (categoryName) => {
     try {
-
-      // loading
-      setLoading(true);
-
-      // Add to Firestore
       await addDoc(collection(db, 'categories'), {
         name: categoryName
       });
-
-      fetchCategories();
     } catch (e) {
       console.error('Error adding category: ', e);
-    } finally {
-      setLoading(false);
     }
   };
 
   const deleteCategory = async (categoryId) => {
     try {
-      // set loading
-      setLoading(true);
-
-      // Reference to the products subcollection
       const productsRef = collection(db, 'categories', categoryId, 'products');
-
-      // Fetch all products in the category
       const productDocs = await getDocs(productsRef);
-
-      // Delete each product document in the subcollection
       const deletePromises = productDocs.docs.map((productDoc) =>
         deleteDoc(doc(db, 'categories', categoryId, 'products', productDoc.id))
       );
-
-      // Wait for all products to be deleted
       await Promise.all(deletePromises);
-
-      // Delete the category document itself
       await deleteDoc(doc(db, 'categories', categoryId));
-
-      // Update local state
-      fetchCategories();
     } catch (e) {
       console.error('Error deleting category: ', e);
-    } finally {
-      setLoading(false);
     }
   };
 
   const updateCategoryName = async (categoryId, newName) => {
     try {
-      setLoading(true);
       const categoryRef = doc(db, 'categories', categoryId);
-
       await updateDoc(categoryRef, { name: newName });
-
-      // Update local state
-      fetchCategories();
     } catch (e) {
       console.error('Error updating category name: ', e);
-    } finally {
-      setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
 
   const toggleNewCategoryModal = () => {
     setNewCategoryModalVisible((prev) => !prev);
@@ -122,7 +88,6 @@ export const AppProvider = ({ children }) => {
   };
 
   // Product management functions
-
   const toggleNewProductModal = () => {
     setNewProductModalVisible((prev) => !prev);
   };
@@ -134,15 +99,10 @@ export const AppProvider = ({ children }) => {
 
   const fetchProducts = async (categoryId) => {
     try {
-      // set loading
       setLoading(true);
-
-      // Query the products subcollection for the specific category
       const productsCollection = collection(db, 'categories', categoryId, 'products');
       const productQuery = query(productsCollection);
       const querySnapshot = await getDocs(productQuery);
-
-      // Map the documents to an array of product data
       const products = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
@@ -160,29 +120,19 @@ export const AppProvider = ({ children }) => {
 
   const addProduct = async (categoryId, newProduct) => {
     try {
-      setLoading(true);
       await addDoc(collection(db, 'categories', categoryId, 'products'), newProduct);
     } catch (e) {
       console.log("Error creating product: ", e);
-    } finally {
-      setLoading(false);
     }
   };
 
 
   const deleteProduct = async (categoryId, productId) => {
     try {
-      setLoading(true);
-      // Get a reference to the specific product document
       const productRef = doc(db, 'categories', categoryId, 'products', productId);
-
-      // Delete the product document
       await deleteDoc(productRef);
-
     } catch (e) {
       console.error('Error deleting product: ', e);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -190,17 +140,10 @@ export const AppProvider = ({ children }) => {
     const updatedFields = { name: newName, price: newPrice };
 
     try {
-      setLoading(true);
-      // Get a reference to the specific product document
       const productRef = doc(db, 'categories', categoryId, 'products', productId);
-
-      // Update the product document
       await updateDoc(productRef, updatedFields);
-
     } catch (e) {
       console.error('Error updating product: ', e);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -208,7 +151,6 @@ export const AppProvider = ({ children }) => {
   // Function to fetch all products from all categories
   const getAllProducts = async () => {
     try {
-      setLoading(true);
       const categoriesCollection = collection(db, 'categories'); // Collection for categories
       const categoriesSnapshot = await getDocs(categoriesCollection); // Get all categories
       let allProducts = []; // Array to hold all products
@@ -222,6 +164,7 @@ export const AppProvider = ({ children }) => {
         // Add each product to the allProducts array
         const productsList = productsSnapshot.docs.map(doc => ({
           id: doc.id,
+          parentId: categoryDoc.id,
           ...doc.data(),
         }));
 
@@ -230,20 +173,160 @@ export const AppProvider = ({ children }) => {
       setAllProducts(allProducts);
     } catch (error) {
       console.error("Error fetching products: ", error);
+    }
+  };
+
+  const fetchInvoices = async () => {
+    try {
+      setLoading(true);
+      const querySnapshot = await getDocs(collection(db, 'invoices'));
+      const invoicesList = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      return invoicesList;
+    } catch (e) {
+      console.error('Error fetching invoices: ', e);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    getAllProducts();
-  }, []);
+  // INVOCIE SESSION
+  const addInvoice = async (invoiceDetail) => {
+    try {
+      await addDoc(collection(db, 'invoices'), {
+        name: invoiceDetail.name,
+        phone: invoiceDetail.phone
+      });
+    } catch (e) {
+      console.error('Error adding invoice: ', e);
+    }
+  };
+
+  const toggleNewInvoiceModal = () => {
+    setNewInvoiceModalVisible((prev) => !prev);
+  };
+
+  const toggleUpdateInvoiceModal = (invoice = null) => {
+    setInvoiceToEdit(invoice);
+    setUpdateInvoiceModalVisible((prev) => !prev);
+  };
+
+
+  const deleteInvoice = async (invoiceId) => {
+    try {
+      const productsRef = collection(db, 'invoices', invoiceId, 'products');
+      const productDocs = await getDocs(productsRef);
+      const deletePromises = productDocs.docs.map((productDoc) =>
+        deleteDoc(doc(db, 'invoices', invoiceId, 'products', productDoc.id))
+      );
+      await Promise.all(deletePromises);
+      await deleteDoc(doc(db, 'invoices', invoiceId));
+    } catch (e) {
+      console.error('Error deleting invoice: ', e);
+    }
+  };
+
+
+  // ADD PRODUCT TO INVOICE
+  interface Invoice {
+    id: string;
+    amount: number;
+    categoryId: string;
+    productId: string;
+  }
+  const toggleAddProductToInvoice = () => {
+    setAddProductToInvoiceVisible((prev) => !prev);
+  };
+
+  const fetchProductsFromInvoice = async (invoiceId) => {
+    try {
+      setLoading(true);
+
+      // Query the products subcollection for the specific category
+      const invoiceCollection = collection(db, 'invoices', invoiceId, 'products');
+      const invoiceQuery = query(invoiceCollection);
+      const invoiceSnapshot = await getDocs(invoiceQuery);
+
+      const invoiceDoc: Invoice[] = invoiceSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as Invoice));
+
+      const products = await Promise.all(invoiceDoc.map(async (invoice) => {
+        const { amount, categoryId, id, productId } = invoice; // Extract parentId, productId, and amount
+
+        try {
+          const productRef = doc(db, 'categories', categoryId, 'products', productId);
+          const productSnap = await getDoc(productRef);
+          return {
+            invoiceId: invoiceId,
+            id,
+            productId,
+            categoryId,
+            ...productSnap.data(), // Spread the product data
+            amount,                // Add the amount from invoice object
+          };
+
+        } catch (error) {
+          console.error("Error fetching product: ", error);
+          return null;
+        }
+      }));
+
+      return products.filter(product => product !== null);
+    } catch (e) {
+      console.error('Error fetching products: ', e);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteFromInvoice = async (invoiceId, productId) => {
+    try {
+      const productRef = doc(db, 'invoices', invoiceId, 'products', productId);
+      await deleteDoc(productRef);
+    } catch (e) {
+      console.error('Error deleteing from invoice products: ', e);
+    }
+  };
+
+  const addProductToInvoice = async (invoiceId, products) => {
+    try {
+      await Promise.all(products.map(async (product) => {
+        const doc = { productId: product[0], categoryId: product[1], amount: 1 };
+        await addDoc(collection(db, 'invoices', invoiceId, 'products'), doc);
+      }));
+    } catch (e) {
+      console.log("Error adding product to invoice: ", e);
+    }
+  };
+
+  const increaseProduct = async (invoiceId, productId, newAmount) => {
+    try {
+      const productRef = doc(db, 'invoices', invoiceId, 'products', productId);
+      await updateDoc(productRef, { amount: newAmount });
+    } catch (e) {
+      console.error('Error increasing product: ', e);
+    }
+  };
+
+  const decreaseProduct = async (invoiceId, productId, newAmount) => {
+    try {
+      const productRef = doc(db, 'invoices', invoiceId, 'products', productId);
+      await updateDoc(productRef, { amount: newAmount });
+    } catch (e) {
+      console.error('Error decreasing product: ', e);
+    }
+  };
+
 
   return (
     <AppContext.Provider
       value={{
         // CATEGORY SESSION
-        categories,
         fetchCategories,
 
         // creat new category
@@ -265,6 +348,7 @@ export const AppProvider = ({ children }) => {
         ////// PRODUCT SESSION
 
         allProducts,
+        getAllProducts,
         fetchProducts,
 
         //update product
@@ -282,6 +366,27 @@ export const AppProvider = ({ children }) => {
         deleteProduct,
 
         loading,
+        setLoading,
+
+        // invoie session
+        addInvoice,
+        deleteInvoice,
+        invoiceToEdit,
+        isNewInvoiceModalVisible,
+        isUpdateInvoiceModalVisible,
+        setNewInvoiceModalVisible,
+        toggleNewInvoiceModal,
+        toggleUpdateInvoiceModal,
+        fetchInvoices,
+
+        // add product to invoice
+        isAddProductToInvoiceModalVisible,
+        toggleAddProductToInvoice,
+        addProductToInvoice,
+        fetchProductsFromInvoice,
+        increaseProduct,
+        decreaseProduct,
+        deleteFromInvoice,
       }}
     >
       {children}

@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { useAppContext } from "../../../AppContext";
+import { useAppContext } from "../../../app-context/app.context";
 import { Modal, StyleSheet, Text, View } from "react-native";
 import { globalFont } from "../../../utils/const";
 

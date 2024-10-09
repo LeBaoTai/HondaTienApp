@@ -1,34 +1,53 @@
-import { Button, FlatList, StyleSheet, Text, View } from "react-native";
-import { useAppContext } from "../../AppContext";
+import { Button, FlatList, StyleSheet, View } from "react-native";
+import { useAppContext } from "../../app-context/app.context";
 import InvoiceItem from "../item/invoice.item";
+import CreateInvoiceModal from "./modal/invoice/create-invoice.modal";
+import { InvoiceProvider } from "../../app-context/invoice.context";
+import { useEffect, useState } from "react";
 
 const InvoiceScreen = () => {
-  const { allProducts } = useAppContext();
+  const { toggleNewInvoiceModal, getAllProducts, fetchInvoices } = useAppContext();
+  const [invoices, setInvoices] = useState([]);
+
+  const fetchInvoicesToRender = async () => {
+    const fetchedInvoices = await fetchInvoices();
+    setInvoices(fetchedInvoices);
+  };
+
+  useEffect(() => {
+    getAllProducts();
+  }, []);
+
+  useEffect(() => {
+    fetchInvoicesToRender();
+  }, []);
+
 
   return (
-    <View style={styles.container}>
-      <Text>Hoa don</Text>
-      <FlatList
-        data={allProducts}
-        keyExtractor={(item) => item.id}
-        renderItem={
-          ({ item }) => {
-            return (
-              <InvoiceItem
-                name={item.name}
-                price={item.price}
-              />
-            );
+    <InvoiceProvider>
+      <View style={styles.container}>
+        <FlatList
+          data={invoices}
+          keyExtractor={(item) => item.id}
+          renderItem={
+            ({ item }) => {
+              return (
+                <InvoiceItem
+                  {...item}
+                />
+              );
+            }
           }
-        }
-      />
-      <View style={styles.btn}>
-        <Button
-          onPress={() => alert('tao')}
-          title="Tao"
         />
+        <View style={styles.btn}>
+          <Button
+            onPress={() => toggleNewInvoiceModal(true)}
+            title='Tạo hoá đơn mới'
+          />
+        </View>
+        <CreateInvoiceModal reload={fetchInvoicesToRender} />
       </View>
-    </View>
+    </InvoiceProvider>
   );
 };
 
@@ -40,7 +59,8 @@ const styles = StyleSheet.create({
   },
 
   btn: {
+    borderTopWidth: 1,
+    borderColor: '#80C4E9',
     padding: 20,
-    backgroundColor: '#ccc'
   }
 });

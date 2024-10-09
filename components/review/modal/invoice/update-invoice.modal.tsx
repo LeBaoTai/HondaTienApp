@@ -1,23 +1,20 @@
-import { useState } from "react";
-import { View, Modal, TextInput, Pressable, StyleSheet, Text, Button } from "react-native";
+import { Modal, View, TextInput, Pressable, Text, StyleSheet } from "react-native";
 import { globalFont } from "../../../../utils/const";
 import { useAppContext } from "../../../../app-context/app.context";
+import { useContext, useState } from "react";
 
-interface IRenameCategory {
-  reload: () => Promise<void>;
-}
+const UpdateInvoiceModal = () => {
+  const { isUpdateInvoiceModalVisible, toggleUpdateInvoiceModal, invoiceToEdit } = useAppContext();
+  const [newName, setNewName] = useState('');
+  const [newPhone, setNewPhone] = useState('');
 
-const RenameCategoryModal = (props: IRenameCategory) => {
-  const { isChangeNameModalVisible, categoryToEdit, toggleChangeCategoryNameModal, updateCategoryName } = useAppContext();
-  const [newName, setNewName] = useState(categoryToEdit ? categoryToEdit.name : '');
-
-
-  const handleChangeName = async () => {
-    if (categoryToEdit) {
-      await updateCategoryName(categoryToEdit.id, newName.trim());
-      setNewName('');
-      toggleChangeCategoryNameModal(null);
-      await props.reload();
+  const handleUpdateInvoie = () => {
+    if (!newName) {
+      alert("Không có tên!!!");
+      return;
+    } else if (!newPhone) {
+      alert("Không có sdt!!!");
+      return;
     }
   };
 
@@ -25,31 +22,42 @@ const RenameCategoryModal = (props: IRenameCategory) => {
     <Modal
       animationType="slide"
       transparent={true}
-      visible={isChangeNameModalVisible}
+      visible={isUpdateInvoiceModalVisible}
       onRequestClose={() => {
-        toggleChangeCategoryNameModal(null);
+        toggleUpdateInvoiceModal(null);
       }}
     >
-      <View style={modalSt.container}>
-        <View style={modalSt.modalView}>
+      <View style={styles.container}>
+        <View style={styles.modalView}>
           {/* form */}
           <View>
             <Text style={[globalFont.mainFont]}>
-              Nhập tên mới:
+              Nhập tên mới: {newName}
             </Text>
             <TextInput
-              style={modalSt.input}
-              placeholder={categoryToEdit ? categoryToEdit.name : ''}
-              value={newName}
-              onChangeText={setNewName}
+              style={styles.input}
+              placeholder={invoiceToEdit ? invoiceToEdit.name : ''}
+              onChangeText={(input) => setNewName(input)}
+            />
+          </View>
+
+          <View>
+            <Text style={[globalFont.mainFont]}>
+              Nhập SDT mới: {newPhone}
+            </Text>
+            <TextInput
+              style={styles.input}
+              placeholder={invoiceToEdit ? invoiceToEdit.phone : ''}
+              onChangeText={(input) => setNewPhone(input)}
+              keyboardType='numeric'
             />
           </View>
 
           {/* button */}
-          <View style={modalSt.buttonGroup}>
+          <View style={styles.buttonGroup}>
             <Pressable
-              onPress={() => toggleChangeCategoryNameModal(null)}
-              style={[modalSt.button, modalSt.buttonCancel]}
+              onPress={() => toggleUpdateInvoiceModal(null)}
+              style={[styles.button, styles.buttonCancel]}
             >
               <Text>
                 Huỷ
@@ -57,11 +65,11 @@ const RenameCategoryModal = (props: IRenameCategory) => {
             </Pressable>
 
             <Pressable
-              style={[modalSt.button, modalSt.buttonAdd]}
-              onPress={handleChangeName}
+              style={[styles.button, styles.buttonAdd]}
+              onPress={handleUpdateInvoie}
             >
               <Text>
-                Thay đổi
+                Thêm
               </Text>
             </Pressable>
           </View>
@@ -71,9 +79,7 @@ const RenameCategoryModal = (props: IRenameCategory) => {
   );
 };
 
-export default RenameCategoryModal;
-
-const modalSt = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
@@ -125,5 +131,4 @@ const modalSt = StyleSheet.create({
   buttonAdd: {
     backgroundColor: '#2196F3',
   }
-
 });

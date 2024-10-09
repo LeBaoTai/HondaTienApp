@@ -1,17 +1,22 @@
 import { useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { globalFont } from "../../../../utils/const";
-import { useAppContext } from "../../../../AppContext";
+import { useAppContext } from "../../../../app-context/app.context";
 
-const CreateCategoryModal = () => {
+interface ICreateCategory {
+  reload: () => Promise<void>;
+}
+
+const CreateCategoryModal = (props: ICreateCategory) => {
   const { isNewCategoryModalVisible, toggleNewCategoryModal, addCategory } = useAppContext();
   const [categoryName, setCategoryName] = useState('');
 
 
-  const handleAddCategory = () => {
-    addCategory(categoryName.trim());
+  const handleAddCategory = async() => {
+    await addCategory(categoryName.trim());
     setCategoryName('');
     toggleNewCategoryModal();
+    await props.reload();
   };
 
   return (

@@ -1,20 +1,30 @@
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
-import { FlatList, StyleSheet, TextInput, View } from "react-native";
-import { useAppContext } from "../../AppContext";
-import CategoryItem from "../item/category.item";
-import RenameCategoryModal from "./modal/category/rename-category.modal";
-import CreateCategoryModal from "./modal/category/create-category.modal";
 import { useEffect, useState } from 'react';
+import { FlatList, StyleSheet, TextInput, View } from "react-native";
+import { useAppContext } from "../../app-context/app.context";
+import CategoryItem from "../item/category.item";
+import CreateCategoryModal from "./modal/category/create-category.modal";
+import RenameCategoryModal from "./modal/category/rename-category.modal";
 
 
 const CategoryScreen = () => {
-	const { categories, toggleNewCategoryModal, fetchCategories } = useAppContext();
+	const { toggleNewCategoryModal, fetchCategories } = useAppContext();
 	const [searchTerm, setSearchTerm] = useState('');
+	const [categories, setCategories] = useState([]);
+
+	const fetchCategoriesToRender = async () => {
+		const fetchedCategories = await fetchCategories();
+		setCategories(fetchedCategories);
+	};
 
 	const filteredCategories = categories.filter(category =>
 		category.name.toLowerCase().includes(searchTerm.toLowerCase())
 	);
+
+	useEffect(() => {
+		fetchCategoriesToRender();
+	}, []);
 
 	return (
 		<View style={styles.container}>
@@ -49,16 +59,16 @@ const CategoryScreen = () => {
 						return (
 							<View>
 								<CategoryItem
-									id={item.id}
-									name={item.name}
+									{...item}
+									reload={fetchCategoriesToRender}
 								/>
 							</View>
 						);
 					}
 				}
 			/>
-			<RenameCategoryModal />
-			<CreateCategoryModal />
+			<RenameCategoryModal reload={fetchCategoriesToRender} />
+			<CreateCategoryModal reload={fetchCategoriesToRender} />
 		</View>
 	);
 };

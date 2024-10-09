@@ -1,27 +1,32 @@
 import { useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { globalFont } from "../../../../utils/const";
-import { useAppContext } from "../../../../AppContext";
+import { useAppContext } from "../../../../app-context/app.context";
 
-const CreateProductModal = (props: any) => {
+interface ICreateProduct {
+  id: string,
+  reload: () => Promise<void>;
+}
+
+const CreateProductModal = (props: ICreateProduct) => {
   const { isNewProductModalVisible, toggleNewProductModal, addProduct } = useAppContext();
   const [productName, setProductName] = useState('');
   const [productPrice, setProductPrice] = useState('');
 
-  const handleAddProduct = () => {
+  const handleAddProduct = async () => {
     if (!productName) {
-      alert('Không có tên!')
+      alert('Không có tên!');
       return;
     }
     if (!productPrice) {
-      alert('Không có giá!')
+      alert('Không có giá!');
       return;
     }
-    addProduct(props.id, {name: productName.trim(), price: productPrice });
+    await addProduct(props.id, { name: productName.trim(), price: productPrice });
     setProductName('');
     setProductPrice('');
     toggleNewProductModal();
-    props.reload()
+    await props.reload();
   };
 
   const formatMoney = (money) => {
@@ -30,7 +35,7 @@ const CreateProductModal = (props: any) => {
     });
 
     return formatter.format(money);
-  }
+  };
 
   return (
     <>
@@ -39,7 +44,7 @@ const CreateProductModal = (props: any) => {
         transparent={true}
         visible={isNewProductModalVisible}
         onRequestClose={() => {
-          toggleNewProductModal()
+          toggleNewProductModal();
         }}
       >
         <View style={styles.container}>
@@ -91,8 +96,8 @@ const CreateProductModal = (props: any) => {
         </View>
       </Modal>
     </>
-  )
-}
+  );
+};
 
 export default CreateProductModal;
 
@@ -148,4 +153,4 @@ const styles = StyleSheet.create({
   buttonAdd: {
     backgroundColor: '#2196F3',
   }
-})
+});

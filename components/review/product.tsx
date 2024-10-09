@@ -3,10 +3,10 @@ import Feather from '@expo/vector-icons/Feather';
 import { RouteProp, useRoute } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import { FlatList, StyleSheet, TextInput, View } from "react-native";
-import { useAppContext } from '../../AppContext';
+import { useAppContext } from '../../app-context/app.context';
 import CreateProductModal from './modal/product/create-product.modal';
 import ProductItem from '../item/product.item';
-import UpdateProduct from './modal/product/update-product.modal';
+import UpdateProductModal from './modal/product/update-product.modal';
 
 const ProductScreen = () => {
 	const route: RouteProp<RootStackParamList, 'ProductScreen'> = useRoute();
@@ -15,13 +15,13 @@ const ProductScreen = () => {
 	const [products, setProducts] = useState([]);
 	const props = route.params;
 
-	const loadProducts = async () => {
+	const fetchProductsToRender = async () => {
 		const fetchedProducts = await fetchProducts(props.id);
 		setProducts(fetchedProducts);
 	};
 
 	useEffect(() => {
-		loadProducts();
+		fetchProductsToRender();
 	}, [props.id]);
 
 	const filteredProducts = products.filter(product =>
@@ -65,15 +65,15 @@ const ProductScreen = () => {
 									price={item.price}
 									id={item.id}
 									parrentId={props.id}
-									reload={loadProducts}
+									reload={fetchProductsToRender}
 								/>
 							</View>
 						);
 					}
 				}
 			/>
-			<CreateProductModal id={props.id} reload={loadProducts} />
-			<UpdateProduct reload={loadProducts} />
+			<CreateProductModal id={props.id} reload={fetchProductsToRender} />
+			<UpdateProductModal reload={fetchProductsToRender} />
 		</View>
 	);
 };

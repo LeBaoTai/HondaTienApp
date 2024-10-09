@@ -1,6 +1,6 @@
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
-import { useAppContext } from "../../AppContext";
+import { useAppContext } from "../../app-context/app.context";
 import { globalFont } from "../../utils/const";
 
 const ProductItem = (props: any) => {

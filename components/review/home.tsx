@@ -4,7 +4,7 @@ import { globalFont } from "../../utils/const";
 
 
 const HomeScreen = () => {
-	const navigation: NavigationProp<RootStackParamList> = useNavigation()
+	const navigation: NavigationProp<RootStackParamList> = useNavigation();
 
 	return (
 		<View style={styles.container}>
@@ -40,7 +40,7 @@ const HomeScreen = () => {
 			</Pressable>
 		</View>
 	);
-}
+};
 const styles = StyleSheet.create({
 	container: {
 		flexDirection: 'row',
@@ -65,6 +65,6 @@ const styles = StyleSheet.create({
 
 		elevation: 3,
 	},
-})
+});
 
 export default HomeScreen;

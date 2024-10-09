@@ -9,6 +9,7 @@ import HomeScreen from "../review/home";
 import ProductScreen from "../review/product";
 import AppHeader from "./app.header";
 import InvoiceScreen from '../review/invoice';
+import InvoiceDetail from '../review/invoice-detail';
 
 const HomeLayout = () => {
   const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -48,6 +49,17 @@ const HomeLayout = () => {
       <Stack.Screen
         name='InvoiceScreen'
         component={InvoiceScreen}
+        options={{
+          title: "Hoá đơn",
+          headerTitleStyle: {
+            fontFamily: LOBSTER_REGULAR,
+          },
+        }}
+      />
+
+      <Stack.Screen
+        name='InvoiceDetailScreen'
+        component={InvoiceDetail}
         options={{
           title: "Hoá đơn",
           headerTitleStyle: {

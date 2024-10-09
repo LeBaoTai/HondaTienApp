@@ -3,7 +3,7 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppProvider } from './AppContext';
+import { AppProvider } from './app-context/app.context';
 import AppNavigation from './components/navigation/app.navigation';
 import { GUERRILLA_REGULAR, INTER_REGULAR, LOBSTER_REGULAR } from './utils/const';
 import * as Network from 'expo-network';
@@ -69,8 +69,8 @@ export default function App() {
 	return (
 		<SafeAreaView style={{ flex: 1, backgroundColor: '#ecf0f1' }}>
 			<AppProvider>
+				<LoadingModal />
 				<NavigationContainer>
-					<LoadingModal />
 					<AppNavigation />
 				</NavigationContainer>
 			</AppProvider>

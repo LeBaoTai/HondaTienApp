@@ -1,12 +1,16 @@
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import React from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
-import { useAppContext } from "../../AppContext";
+import { useAppContext } from "../../app-context/app.context";
 import { globalFont } from "../../utils/const";
 
+interface ICategoryItem {
+  id: string,
+  name: string,
+  reload: () => Promise<void>;
+}
 
-
-const CategoryItem = (props: any) => {
+const CategoryItem = (props: ICategoryItem) => {
   const navigation: NavigationProp<RootStackParamList> = useNavigation();
   const { deleteCategory, toggleChangeCategoryNameModal } = useAppContext();
 
@@ -19,10 +23,15 @@ const CategoryItem = (props: any) => {
           text: 'Huỷ',
           style: 'cancel',
         },
-        { text: 'OK', onPress: () => deleteCategory(props.id) },
+        {
+          text: 'OK', onPress: async () => {
+            await deleteCategory(props.id);
+            await props.reload();
+          }
+        },
       ]
     );
-  }
+  };
 
   return (
     <>
@@ -54,7 +63,7 @@ const CategoryItem = (props: any) => {
       </Pressable>
     </>
   );
-}
+};
 
 export default CategoryItem;
 
